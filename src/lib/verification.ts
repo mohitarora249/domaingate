@@ -18,7 +18,7 @@ export function createVerificationToken(): string {
 export async function checkTxtOwnership(
   hostname: string,
   expectedToken: string,
-): Promise<{ verified: boolean; reason?: string }> {
+): Promise<{ verified: boolean; reason?: string; transient?: boolean }> {
   try {
     // Resolve the dedicated TXT record used for domain ownership verification.
     const records = await resolveTxt(verificationRecordName(hostname));
@@ -61,14 +61,8 @@ export async function checkTxtOwnership(
     // record from a temporary resolver or network failure.
     const code = (error as NodeJS.ErrnoException).code;
 
-    // These errors commonly indicate that the expected TXT record is
-    // missing or DNS could not return a usable answer yet.
-    if (
-      code === "ENODATA" ||
-      code === "ENOTFOUND" ||
-      code === "ESERVFAIL" ||
-      code === "ETIMEOUT"
-    ) {
+    // These errors indicate that the expected TXT record does not exist.
+    if (code === "ENODATA" || code === "ENOTFOUND") {
       return {
         verified: false,
         reason:
@@ -76,10 +70,13 @@ export async function checkTxtOwnership(
       };
     }
 
-    // Fail closed: unexpected DNS errors must never result in verification.
+    // Fail closed: resolver failures (SERVFAIL, timeouts, unexpected errors)
+    // must never result in verification. They are flagged as transient so a
+    // previously verified domain is not revoked over a flaky lookup.
     // Return a generic message rather than exposing internal error details.
     return {
       verified: false,
+      transient: true,
       reason: "DNS lookup failed temporarily. Try again in a moment.",
     };
   }

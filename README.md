@@ -112,6 +112,7 @@ Use the UI for the easiest local flow. The example `curl` requires you to sign i
 4. The user publishes the token as a TXT record at `_domaingate-challenge.<hostname>`.
 5. The verification endpoint resolves the public TXT records on the server. TXT chunks belonging to one record are joined, then the complete expected token is compared using a timing-safe equality check.
 6. Only a matching record changes the status to `VERIFIED`. Resolver errors and missing/mismatched values fail closed.
+7. Re-checking a `VERIFIED` domain whose record is now missing or mismatched moves it to `REVOKED`. Transient resolver failures keep it `VERIFIED` but record and display the failed re-check.
 
 DNS may be cached, so an immediate check can fail after a record was added. Wait for propagation and retry. A temporary DNS failure is not proof that the user does not control the domain.
 
