@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// This sample intentionally uses a single demo workspace. In a real SaaS,
+// replace workspaceId with a foreign key to your authenticated Workspace model.
+model Domain {
+  id                String         @id @default(cuid())
+  hostname          String         @unique @db.VarChar(253)
+  verificationToken String         @db.VarChar(160)
+  status            DomainStatus   @default(PENDING)
+  verifiedAt        DateTime?
+  lastCheckedAt     DateTime?
+  lastError         String?        @db.VarChar(500)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([status, createdAt])
+}
+
+enum DomainStatus {
+  PENDING
+  VERIFIED
+}
