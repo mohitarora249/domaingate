@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSession, setSessionCookie } from "@/lib/auth";
-import { readJson } from "@/lib/http";
+import { errorResponse, readJson } from "@/lib/http";
 
 const schema = z.object({ email: z.string().email(), password: z.string().min(1) });
 
@@ -22,6 +22,6 @@ export async function POST(request: Request) {
     setSessionCookie(response, token);
     return response;
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid request." }, { status: 400 });
+    return errorResponse(error, "Enter a valid email address and password.");
   }
 }

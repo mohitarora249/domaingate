@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireApiSession } from "@/lib/auth";
 import { isReservedHostname, normalizeHostname, verificationRecordName, getRoutingTarget } from "@/lib/domain";
-import { badRequest, readJson } from "@/lib/http";
+import { badRequest, errorResponse, readJson } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { createVerificationToken } from "@/lib/verification";
 
@@ -53,6 +53,6 @@ export async function POST(request: Request) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return badRequest("This hostname has already been claimed.", 409);
     }
-    return badRequest(error instanceof Error ? error.message : "Could not add domain.");
+    return errorResponse(error, "Enter a valid hostname, such as links.example.com.");
   }
 }

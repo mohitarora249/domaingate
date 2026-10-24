@@ -1,4 +1,5 @@
 import { domainToASCII } from "node:url";
+import { UserError } from "@/lib/errors";
 
 /**
  * Normalize a hostname before storing or comparing it:
@@ -12,23 +13,23 @@ import { domainToASCII } from "node:url";
 export function normalizeHostname(input: string): string {
   const trimmed = input.trim().replace(/\.$/, "");
   if (!trimmed || trimmed.includes("://") || /[\/@?#\s]/.test(trimmed)) {
-    throw new Error("Enter a hostname only, such as links.example.com.");
+    throw new UserError("Enter a hostname only, such as links.example.com.");
   }
 
   const ascii = domainToASCII(trimmed).toLowerCase();
   if (!ascii || ascii.length > 253 || ascii === "localhost" || !ascii.includes(".")) {
-    throw new Error("Enter a valid public hostname, such as links.example.com.");
+    throw new UserError("Enter a valid public hostname, such as links.example.com.");
   }
 
   // Disallow IPv4 and IPv6 literals: this feature is for DNS hostnames.
   if (/^\d{1,3}(\.\d{1,3}){3}$/.test(ascii) || ascii.includes("[")) {
-    throw new Error("IP addresses are not supported. Enter a domain name.");
+    throw new UserError("IP addresses are not supported. Enter a domain name.");
   }
 
   const labels = ascii.split(".");
   const validLabel = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
   if (labels.some((label) => label.length > 63 || !validLabel.test(label))) {
-    throw new Error("The hostname contains an invalid DNS label.");
+    throw new UserError("The hostname contains an invalid DNS label.");
   }
 
   return ascii;
