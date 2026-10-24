@@ -91,6 +91,7 @@ All domain endpoints require the demo session cookie. Sign in through the UI fir
 | `GET` | `/api/domains` | List domain records and DNS instructions |
 | `POST` | `/api/domains` | Normalize hostname, create unique challenge, persist pending claim |
 | `POST` | `/api/domains/:id/verify` | Resolve TXT record and update verification state |
+| `POST` | `/api/domains/:id/token` | Replace the challenge token and reset the domain to pending |
 | `DELETE` | `/api/domains/:id` | Delete a domain claim |
 
 Example create request:
@@ -125,6 +126,7 @@ src/
     api/auth/logout/route.ts        # Session logout
     api/domains/route.ts            # Create/list domain claims
     api/domains/[id]/verify/route.ts# Server-side TXT verification
+    api/domains/[id]/token/route.ts # Regenerate challenge token
     api/domains/[id]/route.ts        # Delete claim
     page.tsx                        # Login or dashboard
     layout.tsx                      # Root layout + metadata
